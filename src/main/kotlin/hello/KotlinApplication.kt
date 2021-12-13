@@ -70,7 +70,13 @@ class KotlinApplication {
                 } else if (inRange) {
                     response("T")
                 } else {
-                    response(listOf("F", "R", "L").random())
+                    val forwardPosition = forward(myData.x, myData.y, myData.direction)
+                    if (!underFire(forwardPosition.first, forwardPosition.second, arenaState.values) &&
+                        inBounds(forwardPosition.first, forwardPosition.second, arenaUpdate.arena.dims)
+                    )
+                        response("F")
+                    else
+                        response("R")
                 }
 
             }
