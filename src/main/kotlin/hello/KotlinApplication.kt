@@ -26,8 +26,10 @@ class KotlinApplication {
                 val myUrl = arenaUpdate._links.self.href
                 val myData = arenaUpdate.arena.state[myUrl]!!
 
-                val inRange = arenaUpdate.arena.state
+                val arenaState = arenaUpdate.arena.state
                     .filter { it.key != myUrl }
+
+                val inRange = arenaState
                     .any { (player, state) ->
                         var dx = 0
                         var dy = 0
@@ -59,7 +61,7 @@ class KotlinApplication {
 
                 if (myData.wasHit) {
                     val forwardPosition = forward(myData.x, myData.y, myData.direction)
-                    if (!inRange(forwardPosition.first, forwardPosition.second, arenaUpdate.arena.state.values))
+                    if (!inRange(forwardPosition.first, forwardPosition.second, arenaState.values))
                         response("F")
                     else
                         response("R")
