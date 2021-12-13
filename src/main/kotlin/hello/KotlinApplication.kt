@@ -61,7 +61,7 @@ class KotlinApplication {
 
                 if (myData.wasHit) {
                     val forwardPosition = forward(myData.x, myData.y, myData.direction)
-                    if (!inRange(forwardPosition.first, forwardPosition.second, arenaState.values) &&
+                    if (!underFire(forwardPosition.first, forwardPosition.second, arenaState.values) &&
                         inBounds(forwardPosition.first, forwardPosition.second, arenaUpdate.arena.dims)
                     )
                         response("F")
@@ -84,7 +84,7 @@ class KotlinApplication {
 
     fun response(res: String) = ServerResponse.ok().body(Mono.just(res))
 
-    fun inRange(x: Int, y: Int, state: Collection<PlayerState>): Boolean {
+    fun underFire(x: Int, y: Int, state: Collection<PlayerState>): Boolean {
         val toCheck = buildList {
             (1..3).forEach {
                 add(CheckRange(x, y - it, "N"))
@@ -97,7 +97,7 @@ class KotlinApplication {
         // is there anyone targeting this field?
         return state.any { player ->
             toCheck.any { it.x == player.x && it.y == player.y && it.direction == player.direction }
-        } &&
+        } ||
                 // is this field empty?
                 state.any { player -> x == player.x && y == player.y }
     }
