@@ -57,17 +57,17 @@ class KotlinApplication {
                     }
 
                 if(myData.wasHit)
-                    ServerResponse.ok().body(Mono.just(listOf("F", "R", "L").random()))
-                if (inRange)
-                    ServerResponse.ok().body(Mono.just("T"))
+                    response(listOf("F", "R", "L").random())
+                else if (inRange)
+                    response("T")
                 else
-                    ServerResponse.ok().body(Mono.just(listOf("F", "R", "L").random()))
+                    response(listOf("F", "R", "L").random())
 
-                //ServerResponse.ok().body(Mono.just(listOf("F", "R", "L", "T").random()))
-//                ServerResponse.ok().body(Mono.just("T"))
             }
         }
     }
+
+    fun response(res: String) = ServerResponse.ok().body(Mono.just(res))
 }
 
 fun main(args: Array<String>) {
