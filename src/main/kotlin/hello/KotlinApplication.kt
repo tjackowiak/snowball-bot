@@ -61,7 +61,9 @@ class KotlinApplication {
 
                 if (myData.wasHit) {
                     val forwardPosition = forward(myData.x, myData.y, myData.direction)
-                    if (!inRange(forwardPosition.first, forwardPosition.second, arenaState.values))
+                    if (!inRange(forwardPosition.first, forwardPosition.second, arenaState.values) &&
+                        inBounds(forwardPosition.first, forwardPosition.second, arenaUpdate.arena.dims)
+                    )
                         response("F")
                     else
                         response("R")
@@ -73,6 +75,11 @@ class KotlinApplication {
 
             }
         }
+    }
+
+    private fun inBounds(x: Int, y: Int, dims: List<Int>): Boolean {
+        val (dimX, dimY) = dims
+        return x < dimX && y < dimY
     }
 
     fun response(res: String) = ServerResponse.ok().body(Mono.just(res))
@@ -87,9 +94,12 @@ class KotlinApplication {
             }
         }
 
+        // is there anyone targeting this field?
         return state.any { player ->
             toCheck.any { it.x == player.x && it.y == player.y && it.direction == player.direction }
-        }
+        } &&
+                // is this field empty?
+                state.any { player -> x == player.x && y == player.y }
     }
 
     fun forward(x: Int, y: Int, direction: String): Pair<Int, Int> {
