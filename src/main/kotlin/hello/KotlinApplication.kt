@@ -26,7 +26,6 @@ class KotlinApplication {
                 val myUrl = arenaUpdate._links.self.href
                 val myData = arenaUpdate.arena.state[myUrl]!!
 
-
                 val inRange = arenaUpdate.arena.state
                     .filter { it.key != myUrl }
                     .any { (player, state) ->
@@ -46,28 +45,60 @@ class KotlinApplication {
                         val minYPos = min(myData.y, myData.y + (3 * dy))
                         val maxYPos = max(myData.y, myData.y + (3 * dy))
 
-                        state.x in (minXPos..maxXPos) &&
+                        val inRange = state.x in (minXPos..maxXPos) &&
                                 state.y in (minYPos..maxYPos)
 
-                    }
-                    .also {
-                        println("My pos: $myData")
-                        println("In range: $it")
-                        println()
+                        if (inRange) {
+                            println("My pos: $myData")
+                            println("In range: $player -> $state")
+                            println()
+                        }
+
+                        inRange
                     }
 
-                if(myData.wasHit)
-                    response(listOf("F", "R", "L").random())
-                else if (inRange)
+                if (myData.wasHit) {
+                    val forwardPosition = forward(myData.x, myData.y, myData.direction)
+                    if (!inRange(forwardPosition.first, forwardPosition.second, arenaUpdate.arena.state.values))
+                        response("F")
+                    else
+                        response("R")
+                } else if (inRange) {
                     response("T")
-                else
+                } else {
                     response(listOf("F", "R", "L").random())
+                }
 
             }
         }
     }
 
     fun response(res: String) = ServerResponse.ok().body(Mono.just(res))
+
+    fun inRange(x: Int, y: Int, state: Collection<PlayerState>): Boolean {
+        val toCheck = buildList {
+            (1..3).forEach {
+                add(CheckRange(x, y - it, "N"))
+                add(CheckRange(x, y + it, "S"))
+                add(CheckRange(x - it, y, "E"))
+                add(CheckRange(x + it, y, "W"))
+            }
+        }
+
+        return state.any { player ->
+            toCheck.any { it.x == player.x && it.y == player.y && it.direction == player.direction }
+        }
+    }
+
+    fun forward(x: Int, y: Int, direction: String): Pair<Int, Int> {
+        return when (direction) {
+            "N" -> x to y - 1
+            "S" -> x to y + 1
+            "W" -> x - 1 to y
+            "E" -> x + 1 to y
+            else -> throw RuntimeException("unknown direction $direction")
+        }
+    }
 }
 
 fun main(args: Array<String>) {
@@ -79,3 +110,6 @@ data class PlayerState(val x: Int, val y: Int, val direction: String, val score:
 data class Links(val self: Self)
 data class Self(val href: String)
 data class Arena(val dims: List<Int>, val state: Map<String, PlayerState>)
+
+
+data class CheckRange(val x: Int, val y: Int, val direction: String)
