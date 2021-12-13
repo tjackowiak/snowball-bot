@@ -56,6 +56,8 @@ class KotlinApplication {
                         println()
                     }
 
+                if(myData.wasHit)
+                    ServerResponse.ok().body(Mono.just(listOf("F", "R", "L").random()))
                 if (inRange)
                     ServerResponse.ok().body(Mono.just("T"))
                 else
